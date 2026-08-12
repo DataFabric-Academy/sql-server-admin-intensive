@@ -1,0 +1,23 @@
+# Create per-student XEvent and workload folders (instructor — run on lab server)
+
+$studentCount = 20
+$basePaths = @(
+    'D:\SqlLabs\xevents',
+    'D:\SqlLabs\workload'
+)
+
+foreach ($base in $basePaths) {
+    New-Item -Path $base -ItemType Directory -Force | Out-Null
+}
+
+1..$studentCount | ForEach-Object {
+    $p = 's{0:D2}' -f $_
+    New-Item -Path "D:\SqlLabs\xevents\$p" -ItemType Directory -Force | Out-Null
+    New-Item -Path "D:\SqlLabs\workload\$p" -ItemType Directory -Force | Out-Null
+}
+
+Write-Host 'Created xevents and workload folders for s01..s' + ('{0:D2}' -f $studentCount)
+
+# Grant Modify to SQL Server service account (adjust name for your instance)
+# icacls "D:\SqlLabs\xevents" /grant "NT Service\MSSQLSERVER:(OI)(CI)M"
+# icacls "D:\SqlLabs\workload" /grant "NT Service\MSSQLSERVER:(OI)(CI)M"

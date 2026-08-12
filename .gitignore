@@ -1,0 +1,6 @@
+# Microsoft Office documents
+*.docx
+*.pptx
+
+# Local validation helpers with lab server credentials
+labs/00-env-setup/scripts/_validate-all-labs.ps1
