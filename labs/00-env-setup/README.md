@@ -36,7 +36,7 @@ New-Item -Path 'D:\SqlLabs\backups','D:\SqlLabs\data','D:\SqlLabs\logs','D:\SqlL
 5. สร้างโฟลเดอร์ backup ต่อคน:
 
 ```powershell
-1..20 | ForEach-Object {
+1..30 | ForEach-Object {
   $p = 's{0:D2}' -f $_
   New-Item -Path "D:\SqlLabs\backups\$p" -ItemType Directory -Force | Out-Null
 }

@@ -1,6 +1,6 @@
 # Create per-student XEvent and workload folders (instructor — run on lab server)
 
-$studentCount = 20
+$studentCount = 30
 $basePaths = @(
     'D:\SqlLabs\xevents',
     'D:\SqlLabs\workload'

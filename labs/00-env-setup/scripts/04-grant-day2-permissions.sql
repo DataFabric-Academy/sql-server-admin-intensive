@@ -6,7 +6,7 @@
 USE master;
 GO
 
-DECLARE @StudentCount int = 20;
+DECLARE @StudentCount int = 30;
 DECLARE @i int = 1;
 DECLARE @login sysname;
 DECLARE @sql nvarchar(max);

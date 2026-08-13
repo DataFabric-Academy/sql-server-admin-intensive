@@ -6,7 +6,7 @@
 USE master;
 GO
 
-DECLARE @StudentCount int = 20;
+DECLARE @StudentCount int = 30;
 DECLARE @i int = 1;
 DECLARE @login sysname;
 DECLARE @awDb sysname;
@@ -76,7 +76,7 @@ GO
 
 /*
   Optional PowerShell (instructor):
-  1..20 | ForEach-Object {
+  1..30 | ForEach-Object {
     $p = 's{0:D2}' -f $_
     New-Item -Path "D:\SqlLabs\backups\$p" -ItemType Directory -Force | Out-Null
   }
