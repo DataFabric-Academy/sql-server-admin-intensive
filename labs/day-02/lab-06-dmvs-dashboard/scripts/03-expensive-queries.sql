@@ -1,4 +1,6 @@
-:setvar StudentPrefix s01
+-- >>> Edit your prefix (T-SQL editor — no SQLCMD mode) <<<
+DECLARE @StudentPrefix sysname = N's01';
+DECLARE @DbName sysname = @StudentPrefix + N'_AdventureWorks';
 
 SELECT TOP 15
     DB_NAME(qt.dbid) AS database_name,
@@ -20,6 +22,6 @@ SELECT TOP 15
     ) AS query_text
 FROM sys.dm_exec_query_stats AS qs
 CROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) AS qt
-WHERE DB_NAME(qt.dbid) = N'$(StudentPrefix)_AdventureWorks'
+WHERE DB_NAME(qt.dbid) = @DbName
 ORDER BY qs.total_worker_time DESC;
 GO

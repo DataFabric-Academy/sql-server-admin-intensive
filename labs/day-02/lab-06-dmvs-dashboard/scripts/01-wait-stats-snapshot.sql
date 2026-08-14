@@ -1,4 +1,6 @@
-:setvar StudentPrefix s01
+-- >>> Edit your prefix (T-SQL editor — no SQLCMD mode) <<<
+DECLARE @StudentPrefix sysname = N's01';
+-- Prefix reserved for lab consistency (wait stats are instance-wide)
 
 -- Top waits (excluding common benign types)
 SELECT TOP 15
@@ -28,7 +30,6 @@ WHERE wait_type NOT LIKE N'SLEEP%'
         N'XE_DISPATCHER_JOIN', N'XE_DISPATCHER_WAIT', N'XE_TIMER_EVENT'
   )
 ORDER BY wait_time_ms DESC;
-GO
 
 PRINT N'Note: sys.dm_os_wait_stats is cumulative since restart. Compare relative ranking, not absolute values.';
 GO

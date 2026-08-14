@@ -21,25 +21,27 @@ prerequisites:
 
 ## สิ่งที่ต้องเตรียม
 
+ในทุกสคริปต์แก้เฉพาะ DECLARE (T-SQL editor ปกติ — ไม่ต้องเปิด SQLCMD Mode):
+
 ```sql
-:setvar StudentPrefix s01
-:setvar BackupRoot "D:/SqlLabs/backups"
-:setvar DataPath D:\SqlLabs\data
-:setvar LogPath D:\SqlLabs\logs
+DECLARE @StudentPrefix sysname = N's01';
+DECLARE @BackupRoot nvarchar(260) = N'D:/SqlLabs/backups';
+DECLARE @DataPath nvarchar(260) = N'D:\SqlLabs\data';
+DECLARE @LogPath nvarchar(260) = N'D:\SqlLabs\logs';
 ```
 
-- DB `$(StudentPrefix)_AdventureWorks` restore จาก `D:\Setupfiles\AdventureWorks.bak` แล้ว (env-setup)
+- DB `<prefix>_AdventureWorks` restore จาก `D:\Setupfiles\AdventureWorks.bak` แล้ว (env-setup)
 - Recovery model **FULL**
-- โฟลเดอร์ `$(BackupRoot)\$(StudentPrefix)\` สร้างแล้ว
+- โฟลเดอร์ `D:\SqlLabs\backups\<prefix>\` สร้างแล้ว
 
 ## ความต่างจาก generic_backup ต้นฉบับ
 
 | ต้นฉบับ | Lab นี้ (Instance ร่วม) |
 |---------|-------------------------|
-| DB ชื่อ `AdventureWorks` | `$(StudentPrefix)_AdventureWorks` |
-| `D:\Adv\`, `D:\Backups\myDevice.bak` | `D:\SqlLabs\...`, `$(StudentPrefix)_myDevice.bak` |
+| DB ชื่อ `AdventureWorks` | `<prefix>_AdventureWorks` |
+| `D:\Adv\`, `D:\Backups\myDevice.bak` | `D:\SqlLabs\...`, `<prefix>_myDevice.bak` |
 | Crash: ลบ `.mdf` + stop service | **วิทยากร Demo** crash ให้ดู; นักเรียนทำ Tail-Log ขณะ DB online |
-| Restore ทับ DB เดิม | Restore ไป `$(StudentPrefix)_AdventureWorks_Restore` |
+| Restore ทับ DB เดิม | Restore ไป `<prefix>_AdventureWorks_Restore` |
 
 ## ขั้นตอน (ตาม generic_backup)
 
@@ -55,35 +57,31 @@ prerequisites:
 ## ตรวจสอบผล (Verification)
 
 ```sql
-:setvar StudentPrefix s01
+DECLARE @StudentPrefix sysname = N's01';
+DECLARE @restoreDb sysname = @StudentPrefix + N'_AdventureWorks_Restore';
+DECLARE @sql nvarchar(max) = N'
+USE ' + QUOTENAME(@restoreDb) + N';
 
-USE [$(StudentPrefix)_AdventureWorks_Restore];
-
--- จาก Step 02 / Tail-Log chain
 SELECT ContactTypeID, Name, ModifiedDate
 FROM Person.ContactType
-WHERE Name = N'IT Auditor';
+WHERE Name = N''IT Auditor'';
 
 SELECT COUNT(*) AS UpdatedRowsToday
 FROM Person.Person
 WHERE CAST(ModifiedDate AS DATE) = CAST(GETDATE() AS DATE);
-```
-
-```sql
-RESTORE HEADERONLY
-FROM DISK = N'D:\SqlLabs\backups\s01\s01_myDevice.bak';
+';
+EXEC sys.sp_executesql @sql;
 ```
 
 ## Troubleshooting
 
 | ปัญหา | สาเหตุ | แก้ไข |
 |-------|--------|-------|
-| Cannot open backup device | Path/ACL | ตรวจ `D:\SqlLabs\backups\sXX\` |
-| BACKUP LOG cannot run | ยังไม่มี Full backup | รัน Step 01–02 ใหม่ |
-| LSN chain broken | ข้าม Step / FILE ผิด | ใช้ `RESTORE HEADERONLY` ดู FILE # |
-| Restore MOVE failed | Logical name ผิด | ใช้ `AdventureWorks` / `AdventureWorks_Log` |
+| Cannot open backup device | Path / ACL | ตรวจ `D:\SqlLabs\backups\sXX\` |
+| Logical file name mismatch | AdventureWorks edition ต่าง | ดู `RESTORE FILELISTONLY` แล้วแก้ MOVE |
+| Restore permission | ไม่มี CREATE DATABASE | แจ้งวิทยากร / ใช้สิทธิ์จาก env-setup |
 
-## Challenge
+## Challenge (Optional)
 
-- อ่าน [README ต้นฉบับ](https://github.com/phakkhaphong/SQLServerBackupRestore/blob/main/generic_backup/README.md) แล้วสรุบ RPO ของ Step 04 vs Step 05
+- เปรียบเทียบ Step 04 vs 05 ว่า `IT Auditor` หายหรือไม่
 - ดูวิทยากร Demo crash + `CONTINUE_AFTER_ERROR` แล้วเปรียบกับ Step 03 แบบ online

@@ -1,38 +1,48 @@
-:setvar StudentPrefix s01
-:setvar BcpRoot "D:/SqlLabs/workload"
+-- >>> Edit your prefix (T-SQL editor — no SQLCMD mode) <<<
+DECLARE @StudentPrefix sysname = N's01';
+DECLARE @BcpRoot nvarchar(260) = N'D:/SqlLabs/workload';
+DECLARE @DbName sysname = @StudentPrefix + N'_TSQL';
+DECLARE @outFile nvarchar(400) = @BcpRoot + N'\' + @StudentPrefix + N'\employees.dat';
+DECLARE @sql nvarchar(max);
 
 /*
   Scenario E — Light BCP (optional, run from cmd/PowerShell on machine with bcp.exe)
 
   Prerequisites:
-  - Folder D:\SqlLabs\workload\$(StudentPrefix)\ exists (instructor may create)
-  - Table Employees exists in $(StudentPrefix)_TSQL (standard TSQL1.bak sample)
-
-  Step 1 — Export (run in cmd, replace server/login/password):
-  bcp "SELECT TOP 100 EmployeeID, LastName, FirstName FROM $(StudentPrefix)_TSQL.dbo.Employees" queryout "$(BcpRoot)\$(StudentPrefix)\employees.dat" -S <server>,1433 -U $(StudentPrefix) -P <password> -c -t"|"
-
-  Step 2 — Create staging table (run in SSMS):
+  - Folder D:\SqlLabs\workload\<prefix>\ exists (instructor may create)
+  - Table Employees exists in <prefix>_TSQL (standard TSQL1.bak sample)
 */
-USE [$(StudentPrefix)_TSQL];
-GO
 
-IF OBJECT_ID(N'dbo.Employees_BcpStaging', N'U') IS NOT NULL
+-- Step 1 — Export (copy printed command to cmd; replace server/password):
+PRINT N'bcp "SELECT TOP 100 EmployeeID, LastName, FirstName FROM '
+    + @DbName + N'.dbo.Employees" queryout "'
+    + @outFile + N'" -S <server>,1433 -U ' + @StudentPrefix + N' -P <password> -c -t"|"';
+
+-- Step 2 — Create staging table
+SET @sql = N'USE ' + QUOTENAME(@DbName) + N';
+IF OBJECT_ID(N''dbo.Employees_BcpStaging'', N''U'') IS NOT NULL
     DROP TABLE dbo.Employees_BcpStaging;
-GO
 
 CREATE TABLE dbo.Employees_BcpStaging
 (
     EmployeeID int NOT NULL,
     LastName nvarchar(50) NOT NULL,
     FirstName nvarchar(50) NOT NULL
-);
+);';
+EXEC sys.sp_executesql @sql;
+
+-- Step 3 — Import (copy printed command to cmd after export):
+PRINT N'bcp ' + @DbName + N'.dbo.Employees_BcpStaging in "'
+    + @outFile + N'" -S <server>,1433 -U ' + @StudentPrefix + N' -P <password> -c -t"|"';
+
+PRINT N'After bcp import, run the VERIFY batch below (F5 on selection).';
 GO
 
-/*
-  Step 3 — Import:
-  bcp $(StudentPrefix)_TSQL.dbo.Employees_BcpStaging in "$(BcpRoot)\$(StudentPrefix)\employees.dat" -S <server>,1433 -U $(StudentPrefix) -P <password> -c -t"|"
-*/
-
--- Verify row count
-SELECT COUNT(*) AS imported_rows FROM dbo.Employees_BcpStaging;
+-- ========== VERIFY (re-run after bcp import) ==========
+-- >>> Edit your prefix (T-SQL editor — no SQLCMD mode) <<<
+DECLARE @StudentPrefix sysname = N's01';
+DECLARE @DbName sysname = @StudentPrefix + N'_TSQL';
+DECLARE @sql nvarchar(max) = N'USE ' + QUOTENAME(@DbName) + N';
+SELECT COUNT(*) AS imported_rows FROM dbo.Employees_BcpStaging;';
+EXEC sys.sp_executesql @sql;
 GO

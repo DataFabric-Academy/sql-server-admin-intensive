@@ -18,11 +18,11 @@ prerequisites:
 ## สิ่งที่ต้องเตรียม
 
 - SQL Auth ด้วย Login ของคุณ
-- สิทธิ์ `db_owner` บน `$(StudentPrefix)_AdventureWorks`
-- โฟลเดอร์ backup: `D:\SqlLabs\backups\$(StudentPrefix)\` (วิทยากรสร้างให้แล้ว)
+- สิทธิ์ `db_owner` บน `<prefix>_AdventureWorks`
+- โฟลเดอร์ backup: `D:\SqlLabs\backups\<prefix>\` (วิทยากรสร้างให้แล้ว)
 
 ```sql
-:setvar StudentPrefix s01
+DECLARE @StudentPrefix sysname = N's01';
 ```
 
 ## ขั้นตอน
@@ -50,11 +50,12 @@ prerequisites:
 ## ตรวจสอบผล (Verification)
 
 ```sql
-:setvar StudentPrefix s01
+DECLARE @StudentPrefix sysname = N's01';
+DECLARE @db sysname = @StudentPrefix + N'_AdventureWorks';
 
 SELECT name, recovery_model_desc, log_reuse_wait_desc
 FROM sys.databases
-WHERE name = N'$(StudentPrefix)_AdventureWorks';
+WHERE name = @db;
 
 DBCC SQLPERF(logspace);
 ```

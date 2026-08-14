@@ -1,7 +1,15 @@
-:setvar StudentPrefix s01
+/*
+  Lab 02 — inspect recovery model / log space / files
+  Edit the DECLARE block only (T-SQL editor — no SQLCMD mode).
+*/
 
-USE [$(StudentPrefix)_AdventureWorks];
-GO
+-- >>> Edit your prefix (T-SQL editor — no SQLCMD mode) <<<
+DECLARE @StudentPrefix sysname = N's01';
+DECLARE @db sysname = @StudentPrefix + N'_AdventureWorks';
+DECLARE @sql nvarchar(max);
+
+SET @sql = N'
+USE ' + QUOTENAME(@db) + N';
 
 SELECT
     name,
@@ -9,11 +17,9 @@ SELECT
     log_reuse_wait_desc,
     log_reuse_wait
 FROM sys.databases
-WHERE name = N'$(StudentPrefix)_AdventureWorks';
-GO
+WHERE name = @dbName;
 
 DBCC SQLPERF(logspace);
-GO
 
 SELECT
     name AS logical_name,
@@ -23,4 +29,7 @@ SELECT
     growth,
     is_percent_growth
 FROM sys.database_files;
+';
+
+EXEC sys.sp_executesql @sql, N'@dbName sysname', @dbName = @db;
 GO

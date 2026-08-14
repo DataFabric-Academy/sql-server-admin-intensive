@@ -1,5 +1,7 @@
-:setvar StudentPrefix s01
-
+/*
+  Lab 04 — verify SQLAgent* role membership
+  Run in normal T-SQL editor (no SQLCMD mode).
+*/
 SELECT SUSER_SNAME() AS login_name;
 
 USE msdb;

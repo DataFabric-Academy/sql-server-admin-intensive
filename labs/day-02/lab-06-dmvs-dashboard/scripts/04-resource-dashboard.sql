@@ -1,4 +1,6 @@
-:setvar StudentPrefix s01
+-- >>> Edit your prefix (T-SQL editor — no SQLCMD mode) <<<
+DECLARE @StudentPrefix sysname = N's01';
+DECLARE @DbName sysname = @StudentPrefix + N'_AdventureWorks';
 
 -- Grid 1: Instance CPU / uptime
 SELECT
@@ -7,7 +9,6 @@ SELECT
     sqlserver_start_time,
     DATEDIFF(minute, sqlserver_start_time, SYSDATETIME()) AS uptime_minutes
 FROM sys.dm_os_sys_info;
-GO
 
 -- Grid 2: Memory
 SELECT
@@ -17,7 +18,6 @@ SELECT
     process_physical_memory_low,
     process_virtual_memory_low
 FROM sys.dm_os_process_memory;
-GO
 
 -- Grid 3: I/O per database file (student DB)
 SELECT
@@ -37,9 +37,8 @@ FROM sys.dm_io_virtual_file_stats(NULL, NULL) AS vfs
 JOIN sys.master_files AS mf
     ON mf.database_id = vfs.database_id
    AND mf.file_id = vfs.file_id
-WHERE DB_NAME(vfs.database_id) = N'$(StudentPrefix)_AdventureWorks'
+WHERE DB_NAME(vfs.database_id) = @DbName
 ORDER BY mf.type_desc, mf.file_id;
-GO
 
 -- Grid 4: Active requests count by database
 SELECT

@@ -4,3 +4,4 @@
 
 # Local validation helpers with lab server credentials
 labs/00-env-setup/scripts/_validate-all-labs.ps1
+labs/00-env-setup/scripts/_provision-s01-s30.sql

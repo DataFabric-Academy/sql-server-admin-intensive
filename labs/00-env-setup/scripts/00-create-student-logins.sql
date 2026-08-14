@@ -8,7 +8,7 @@ USE master;
 GO
 
 DECLARE @StudentCount int = 30;          -- adjust per class size
-DECLARE @Pwd sysname = N'ChangeMe!Lab01'; -- temporary class password
+DECLARE @Pwd sysname = N'Pa55w.rd'; -- class password
 DECLARE @i int = 1;
 DECLARE @login sysname;
 DECLARE @sql nvarchar(max);

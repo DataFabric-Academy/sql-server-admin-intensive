@@ -1,18 +1,28 @@
-:setvar StudentPrefix s01
+/*
+  Lab 01 — create role + schema grants
+  Edit the DECLARE block only (T-SQL editor — no SQLCMD mode).
+*/
 
-USE [$(StudentPrefix)_AdventureWorks];
-GO
+-- >>> Edit your prefix (T-SQL editor — no SQLCMD mode) <<<
+DECLARE @StudentPrefix sysname = N's01';
+DECLARE @db sysname = @StudentPrefix + N'_AdventureWorks';
+DECLARE @role sysname = @StudentPrefix + N'_HRUsers';
+DECLARE @sql nvarchar(max);
+
+SET @sql = N'
+USE ' + QUOTENAME(@db) + N';
 
 IF NOT EXISTS (
     SELECT 1 FROM sys.database_principals
-    WHERE name = N'$(StudentPrefix)_HRUsers' AND type = 'R'
+    WHERE name = @roleName AND type = ''R''
 )
-    CREATE ROLE [$(StudentPrefix)_HRUsers];
-GO
+    CREATE ROLE ' + QUOTENAME(@role) + N';
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::HumanResources TO [$(StudentPrefix)_HRUsers];
-GRANT SELECT ON SCHEMA::Sales TO [$(StudentPrefix)_HRUsers];
-GO
+GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::HumanResources TO ' + QUOTENAME(@role) + N';
+GRANT SELECT ON SCHEMA::Sales TO ' + QUOTENAME(@role) + N';
 
-PRINT N'Role and schema grants applied for $(StudentPrefix)_HRUsers';
+PRINT N''Role and schema grants applied for '' + @roleName;
+';
+
+EXEC sys.sp_executesql @sql, N'@roleName sysname', @roleName = @role;
 GO

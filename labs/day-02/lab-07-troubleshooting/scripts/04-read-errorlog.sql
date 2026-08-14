@@ -1,12 +1,11 @@
-:setvar StudentPrefix s01
+-- >>> Edit your prefix (T-SQL editor — no SQLCMD mode) <<<
+DECLARE @StudentPrefix sysname = N's01';
 
 -- Recent error log entries (login failed, backup, agent)
 EXEC sys.sp_readerrorlog 0, 1, N'Login failed';
-GO
 
 EXEC sys.sp_readerrorlog 0, 1, N'backup';
-GO
 
 -- Optional: search for student prefix in messages
-EXEC sys.sp_readerrorlog 0, 1, N'$(StudentPrefix)';
+EXEC sys.sp_readerrorlog 0, 1, @StudentPrefix;
 GO

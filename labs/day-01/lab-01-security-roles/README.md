@@ -21,13 +21,11 @@ prerequisites:
 - SSMS 22 เปิด repo นี้ผ่าน Git
 - Connect ด้วย SQL Auth Login ของคุณ (เช่น `s01`)
 - Database: `s01_AdventureWorks` (สร้างจาก env-setup)
-- ตั้งค่า prefix:
+- ในทุกสคริปต์แก้เฉพาะบรรทัดนี้ (T-SQL editor ปกติ — ไม่ต้องเปิด SQLCMD Mode):
 
 ```sql
-:setvar StudentPrefix s01
+DECLARE @StudentPrefix sysname = N's01';
 ```
-
-> ถ้า SSMS ไม่รองรับ `:setvar` ให้ค้นหาแทนที่ `s01` ด้วย prefix ของคุณทั้งไฟล์
 
 ## ขั้นตอน
 
@@ -59,24 +57,33 @@ prerequisites:
 ## ตรวจสอบผล (Verification)
 
 ```sql
-:setvar StudentPrefix s01
+DECLARE @StudentPrefix sysname = N's01';
+DECLARE @db sysname = @StudentPrefix + N'_AdventureWorks';
+DECLARE @role sysname = @StudentPrefix + N'_HRUsers';
+DECLARE @tester sysname = @StudentPrefix + N'_tester';
+DECLARE @sql nvarchar(max);
 
-USE [$(StudentPrefix)_AdventureWorks];
-GO
+SET @sql = N'
+USE ' + QUOTENAME(@db) + N';
 
 SELECT dp.name AS role_name, mp.name AS member_name
 FROM sys.database_role_members rm
 JOIN sys.database_principals dp ON rm.role_principal_id = dp.principal_id
 JOIN sys.database_principals mp ON rm.member_principal_id = mp.principal_id
-WHERE dp.name = N'$(StudentPrefix)_HRUsers';
+WHERE dp.name = @role;
 
 SELECT pr.name AS principal_name, pe.permission_name, pe.state_desc, pe.class_desc,
        SCHEMA_NAME(o.schema_id) AS schema_name, o.name AS object_name
 FROM sys.database_permissions pe
 JOIN sys.database_principals pr ON pe.grantee_principal_id = pr.principal_id
 LEFT JOIN sys.objects o ON pe.major_id = o.object_id
-WHERE pr.name IN (N'$(StudentPrefix)_HRUsers', N'$(StudentPrefix)_tester')
+WHERE pr.name IN (@role, @tester)
 ORDER BY pr.name, pe.permission_name;
+';
+
+EXEC sys.sp_executesql @sql,
+    N'@role sysname, @tester sysname',
+    @role = @role, @tester = @tester;
 ```
 
 ## Troubleshooting
@@ -90,5 +97,5 @@ ORDER BY pr.name, pe.permission_name;
 
 ## Challenge (Optional)
 
-- สร้าง Role `$(StudentPrefix)_SalesReaders` ที่ SELECT ได้เฉพาะ `SCHEMA::Sales`
+- สร้าง Role `<prefix>_SalesReaders` ที่ SELECT ได้เฉพาะ `SCHEMA::Sales`
 - ทดลอง REVOKE DENY แล้วยืนยันว่าสิทธิ์จาก Role กลับมาใช้งานได้

@@ -15,17 +15,18 @@ prerequisites:
 - Snapshot wait stats (filter benign)
 - หา active requests และ blocking chain
 - ดู expensive queries จาก plan cache
-- รัน Resource Dashboard สำหรับ `$(StudentPrefix)_AdventureWorks`
+- รัน Resource Dashboard สำหรับ `<prefix>_AdventureWorks`
 - รัน workload แล้วสังเกตการเปลี่ยนแปลง
 
 ## สิ่งที่ต้องเตรียม
 
 ```sql
-:setvar StudentPrefix s01
+DECLARE @StudentPrefix sysname = N's01';
 ```
 
-- DB: `$(StudentPrefix)_AdventureWorks`
+- DB: `<prefix>_AdventureWorks`
 - สิทธิ์ `VIEW SERVER STATE`
+- รันใน T-SQL editor ปกติ — ไม่ต้องเปิด SQLCMD Mode
 
 ## ขั้นตอน
 
@@ -42,7 +43,7 @@ prerequisites:
 ## ตรวจสอบผล (Verification)
 
 - หลัง workload: เห็น active requests หรือ wait type เปลี่ยน (เช่น `PAGEIOLATCH`, `CXPACKET`)
-- Dashboard แสดง CPU, memory, I/O latency ของไฟล์ใน `$(StudentPrefix)_AdventureWorks`
+- Dashboard แสดง CPU, memory, I/O latency ของไฟล์ใน `<prefix>_AdventureWorks`
 - บันทึก Top 3 wait types และ expensive query 1 รายการ
 
 ## Troubleshooting

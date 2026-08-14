@@ -1,4 +1,6 @@
-:setvar StudentPrefix s01
+-- >>> Edit your prefix (T-SQL editor — no SQLCMD mode) <<<
+DECLARE @StudentPrefix sysname = N's01';
+DECLARE @DbName sysname = @StudentPrefix + N'_AdventureWorks';
 
 -- Find blocker chain while Scenario B is active
 SELECT
@@ -38,9 +40,8 @@ LEFT JOIN sys.dm_exec_sessions AS blocker_s ON blocker_s.session_id = blocker.se
 OUTER APPLY sys.dm_exec_sql_text(blocked.sql_handle) AS blocked_text
 OUTER APPLY sys.dm_exec_sql_text(blocker.sql_handle) AS blocker_text
 WHERE blocked.blocking_session_id <> 0
-  AND DB_NAME(blocked.database_id) = N'$(StudentPrefix)_AdventureWorks'
+  AND DB_NAME(blocked.database_id) = @DbName
 ORDER BY blocked.wait_time DESC;
-GO
 
 PRINT N'Resolution options: ask blocker session to COMMIT/ROLLBACK, or KILL <blocker_spid> (last resort).';
 GO

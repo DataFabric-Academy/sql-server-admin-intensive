@@ -1,46 +1,59 @@
-:setvar StudentPrefix s01
-:setvar BackupRoot "D:/SqlLabs/backups"
+/*
+  Lab 02 — FULL recovery, full backup, workload, log backup
+  Edit the DECLARE block only (T-SQL editor — no SQLCMD mode).
+*/
+
+-- >>> Edit your prefix (T-SQL editor — no SQLCMD mode) <<<
+DECLARE @StudentPrefix sysname = N's01';
+DECLARE @BackupRoot nvarchar(260) = N'D:/SqlLabs/backups';
+DECLARE @db sysname = @StudentPrefix + N'_AdventureWorks';
+DECLARE @fullBak nvarchar(4000) =
+    @BackupRoot + N'/' + @StudentPrefix + N'/' + @StudentPrefix + N'_AdventureWorks_full.bak';
+DECLARE @logBak nvarchar(4000) =
+    @BackupRoot + N'/' + @StudentPrefix + N'/' + @StudentPrefix + N'_AdventureWorks_lab02.trn';
+DECLARE @sql nvarchar(max);
 
 USE master;
-GO
 
-ALTER DATABASE [$(StudentPrefix)_AdventureWorks] SET RECOVERY FULL;
-GO
+SET @sql = N'ALTER DATABASE ' + QUOTENAME(@db) + N' SET RECOVERY FULL;';
+EXEC sys.sp_executesql @sql;
 
 -- Full backup required before first log backup
-BACKUP DATABASE [$(StudentPrefix)_AdventureWorks]
-TO DISK = N'$(BackupRoot)/$(StudentPrefix)/$(StudentPrefix)_AdventureWorks_full.bak'
-WITH INIT, COMPRESSION, STATS = 10;
-GO
+SET @sql = N'BACKUP DATABASE ' + QUOTENAME(@db)
+    + N' TO DISK = N''' + REPLACE(@fullBak, N'''', N'''''')
+    + N''' WITH INIT, COMPRESSION, STATS = 10;';
+EXEC sys.sp_executesql @sql;
 
-USE [$(StudentPrefix)_AdventureWorks];
-GO
+SET @sql = N'
+USE ' + QUOTENAME(@db) + N';
 
-PRINT N'--- Before workload (FULL) ---';
+PRINT N''--- Before workload (FULL) ---'';
 DBCC SQLPERF(logspace);
 
 INSERT INTO dbo.LabAudit (Note)
-SELECT CONCAT(N'full-', v.number)
+SELECT CONCAT(N''full-'', v.number)
 FROM master..spt_values AS v
-WHERE v.type = N'P' AND v.number BETWEEN 1 AND 8000;
+WHERE v.type = N''P'' AND v.number BETWEEN 1 AND 8000;
 
 CHECKPOINT;
 
-PRINT N'--- After CHECKPOINT (FULL often still waits for LOG_BACKUP) ---';
+PRINT N''--- After CHECKPOINT (FULL often still waits for LOG_BACKUP) ---'';
 SELECT name, recovery_model_desc, log_reuse_wait_desc
 FROM sys.databases
-WHERE name = N'$(StudentPrefix)_AdventureWorks';
+WHERE name = @dbName;
 DBCC SQLPERF(logspace);
-GO
+';
 
-BACKUP LOG [$(StudentPrefix)_AdventureWorks]
-TO DISK = N'$(BackupRoot)/$(StudentPrefix)/$(StudentPrefix)_AdventureWorks_lab02.trn'
-WITH INIT, COMPRESSION;
-GO
+EXEC sys.sp_executesql @sql, N'@dbName sysname', @dbName = @db;
+
+SET @sql = N'BACKUP LOG ' + QUOTENAME(@db)
+    + N' TO DISK = N''' + REPLACE(@logBak, N'''', N'''''')
+    + N''' WITH INIT, COMPRESSION;';
+EXEC sys.sp_executesql @sql;
 
 PRINT N'--- After LOG backup ---';
 SELECT name, recovery_model_desc, log_reuse_wait_desc
 FROM sys.databases
-WHERE name = N'$(StudentPrefix)_AdventureWorks';
+WHERE name = @db;
 DBCC SQLPERF(logspace);
 GO

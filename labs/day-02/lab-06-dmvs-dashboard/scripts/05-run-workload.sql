@@ -1,9 +1,9 @@
-:setvar StudentPrefix s01
-
-USE [$(StudentPrefix)_AdventureWorks];
-GO
+-- >>> Edit your prefix (T-SQL editor — no SQLCMD mode) <<<
+DECLARE @StudentPrefix sysname = N's01';
+DECLARE @DbName sysname = @StudentPrefix + N'_AdventureWorks';
 
 -- Adapted from NAS Lab13 workload1 — heavy joins on Sales/Person
+DECLARE @sql nvarchar(max) = N'USE ' + QUOTENAME(@DbName) + N';
 DECLARE @i int = 0;
 WHILE @i < 20
 BEGIN
@@ -19,10 +19,11 @@ BEGIN
     GROUP BY p.FirstName, p.LastName, pr.Name
     ORDER BY LineTotal DESC;
 
-    WAITFOR DELAY '00:00:01';
+    WAITFOR DELAY ''00:00:01'';
     SET @i += 1;
 END
-GO
+';
+EXEC sys.sp_executesql @sql;
 
 PRINT N'Re-run 01-wait-stats-snapshot.sql, 02-active-requests-blocking.sql, and 04-resource-dashboard.sql';
 GO

@@ -20,10 +20,10 @@
 1. ติดตั้ง [SSMS 22](https://learn.microsoft.com/sql/ssms/download-sql-server-management-studio-ssms) ที่มี Git integration
 2. Clone repo นี้ไปยังเครื่องนักเรียน (หรือเปิดจาก Git ใน SSMS)
 3. Connect ไปยัง Lab Instance ด้วย **SQL Authentication** (Login ที่วิทยากรแจก เช่น `s01`)
-4. ตั้งค่า prefix ของคุณในทุกสคริปต์:
+4. ตั้งค่า prefix ของคุณในทุกสคริปต์ (T-SQL editor ปกติ — **ไม่ต้อง** เปิด SQLCMD Mode):
 
 ```sql
-:setvar StudentPrefix s01
+DECLARE @StudentPrefix sysname = N's01';
 ```
 
 5. เริ่มจาก Lesson ของ Module แล้วทำ Lab ตามลำดับ

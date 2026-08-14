@@ -1,13 +1,22 @@
-:setvar StudentPrefix s01
-:setvar BackupRoot "D:/SqlLabs/backups"
-
+/*
+  Lab 04 — create backup job + hourly schedule
+  Edit the DECLARE block only (T-SQL editor — no SQLCMD mode).
+*/
 USE msdb;
 GO
 
-DECLARE @job sysname = N'$(StudentPrefix)_Backup_AdventureWorks';
-DECLARE @sched sysname = N'$(StudentPrefix)_Backup_Hourly';
+DECLARE @StudentPrefix sysname = N's01';
+DECLARE @BackupRoot nvarchar(260) = N'D:/SqlLabs/backups';
+
+DECLARE @job sysname = @StudentPrefix + N'_Backup_AdventureWorks';
+DECLARE @sched sysname = @StudentPrefix + N'_Backup_Hourly';
+DECLARE @db sysname = @StudentPrefix + N'_AdventureWorks';
+DECLARE @bak nvarchar(4000) =
+    @BackupRoot + N'/' + @StudentPrefix + N'/' + @StudentPrefix + N'_agent_full.bak';
 DECLARE @cmd nvarchar(max) =
-    N'BACKUP DATABASE [$(StudentPrefix)_AdventureWorks] TO DISK = N''$(BackupRoot)/$(StudentPrefix)/$(StudentPrefix)_agent_full.bak'' WITH INIT, COMPRESSION;';
+    N'BACKUP DATABASE ' + QUOTENAME(@db)
+    + N' TO DISK = N''' + REPLACE(@bak, N'''', N'''''')
+    + N''' WITH INIT, COMPRESSION;';
 
 BEGIN TRY
     EXEC dbo.sp_delete_job @job_name = @job, @delete_unused_schedule = 1;
@@ -62,8 +71,6 @@ END CATCH;
 EXEC dbo.sp_add_jobserver
     @job_name = @job,
     @server_name = N'(LOCAL)';
-GO
 
--- Optional: start job manually from SSMS after SQL Server Agent is running
-PRINT N'Job created. Start $(StudentPrefix)_Backup_AdventureWorks from SSMS when Agent is running.';
+PRINT N'Job created: ' + @job + N'. Start it from SSMS when Agent is running.';
 GO

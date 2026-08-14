@@ -15,16 +15,17 @@ prerequisites:
 - ตรวจ connectivity จากเครื่องตนเอง
 - จำลอง blocking 2 session แล้วหา blocker ด้วย DMV
 - อ่าน Error Log หา login / backup errors
-- (Optional) BCP export/import ตารางเล็กจาก `$(StudentPrefix)_TSQL`
+- (Optional) BCP export/import ตารางเล็กจาก `<prefix>_TSQL`
 
 ## สิ่งที่ต้องเตรียม
 
 ```sql
-:setvar StudentPrefix s01
+DECLARE @StudentPrefix sysname = N's01';
 ```
 
-- DB: `$(StudentPrefix)_AdventureWorks`, `$(StudentPrefix)_TSQL`
+- DB: `<prefix>_AdventureWorks`, `<prefix>_TSQL`
 - SSMS 2 query windows (สำหรับ blocking drill)
+- รันใน T-SQL editor ปกติ — ไม่ต้องเปิด SQLCMD Mode
 
 ## ขั้นตอน
 
