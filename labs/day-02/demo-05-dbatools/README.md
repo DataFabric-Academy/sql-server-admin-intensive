@@ -7,10 +7,13 @@
 ```powershell
 Install-Module dbatools -Scope CurrentUser -Force
 Import-Module dbatools
+# Lab instance มักใช้ self-signed cert — จำเป็นสำหรับ dbatools รุ่นใหม่
+Set-DbatoolsConfig -FullName sql.connection.trustcert -Value $true
 ```
 
 - รันบน GCP Member Server ด้วย Windows Auth
 - ไม่ให้นักเรียนรัน (ไม่มี dbatools บนเครื่องนักเรียนจำเป็น)
+- Error `certificate chain was issued by an authority that is not trusted` → รัน `Set-DbatoolsConfig` ข้างบน หรือใส่ `-TrustServerCertificate`
 
 ## Scripts
 

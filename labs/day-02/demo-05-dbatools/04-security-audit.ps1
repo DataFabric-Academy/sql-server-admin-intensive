@@ -4,6 +4,7 @@ param(
 )
 
 Import-Module dbatools -ErrorAction Stop
+Set-DbatoolsConfig -FullName sql.connection.trustcert -Value $true
 
 Write-Host "=== Orphan Users ===" -ForegroundColor Cyan
 Get-DbaOrphanUser -SqlInstance $SqlInstance |

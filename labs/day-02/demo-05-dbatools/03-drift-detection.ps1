@@ -4,6 +4,7 @@ param(
 )
 
 Import-Module dbatools -ErrorAction Stop
+Set-DbatoolsConfig -FullName sql.connection.trustcert -Value $true
 
 Write-Host "=== sp_configure not compliant with best practice ===" -ForegroundColor Cyan
 Test-DbaSpConfigure -SqlInstance $SqlInstance |

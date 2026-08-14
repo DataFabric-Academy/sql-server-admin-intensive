@@ -33,7 +33,7 @@ audience: instructor-demo
 
 | คำสั่ง | ใช้เมื่อ |
 |--------|---------|
-| `Get-DbaInstance` | รายการ instance, version, edition |
+| `Connect-DbaInstance` | เชื่อมต่อ + ดู version, edition, clustered |
 | `Get-DbaDiskSpace` | พื้นที่ดิสก์ / DB size |
 | `Get-DbaService` | SQL services ที่ไม่ running |
 | `Get-DbaLastBackup` | DB ที่ไม่มี full backup ตาม SLA |
@@ -56,8 +56,10 @@ audience: instructor-demo
 # Prerequisites on instructor machine
 Install-Module dbatools -Scope CurrentUser -Force
 Import-Module dbatools
+Set-DbatoolsConfig -FullName sql.connection.trustcert -Value $true
 
-Get-DbaInstance -SqlInstance $env:COMPUTERNAME
+Connect-DbaInstance -SqlInstance $env:COMPUTERNAME -TrustServerCertificate |
+    Select-Object ComputerName, InstanceName, Version, Edition, IsClustered
 Get-DbaLastBackup -SqlInstance localhost | Where-Object { $_.LastFullBackup -lt (Get-Date).AddDays(-1) }
 ```
 
